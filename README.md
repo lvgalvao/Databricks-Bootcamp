@@ -2,7 +2,7 @@
 
 Capacitar os participantes a projetar e implementar um pipeline de dados completo e automatizado, utilizando Databricks como a plataforma principal para gerenciar, transformar e analisar dados em escala empresarial. O bootcamp simulará um cenário real de projeto, envolvendo desde a configuração do ambiente na AWS até a criação de KPIs estratégicos para tomada de decisão.
 
-**Excalidraw** Link 
+**Excalidraw** Link https://link.excalidraw.com/l/8pvW6zbNUnD/1YARzqp6Mz9
 
 ---
 
