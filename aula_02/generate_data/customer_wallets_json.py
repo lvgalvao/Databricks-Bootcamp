@@ -36,7 +36,7 @@ def save_customers_to_local(n_customers, output_dir):
 # Executar geração e salvar localmente
 if __name__ == "__main__":
     n_customers = 10  # Número de clientes
-    output_dir = "json_files"  # Diretório de saída
+    output_dir = "."  # Diretório de saída
 
     # Gerar e salvar localmente
     save_customers_to_local(n_customers, output_dir)
