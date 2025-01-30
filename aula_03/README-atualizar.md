@@ -10,6 +10,7 @@ As tabelas **Silver** e **Gold** precisam ser **atualizadas periodicamente** par
 Se a tabela precisa ser **recalculada periodicamente**, podemos sobrescrevê-la:
 
 ```sql
+%sql
 INSERT OVERWRITE TABLE gold.transactions
 WITH btc_price AS (
     SELECT 
@@ -21,18 +22,20 @@ WITH btc_price AS (
 SELECT 
     t.transaction_id,
     t.customer_id,
-    t.transaction_type,
     t.btc_amount,
-    t.transaction_date,
+    CAST(t.transaction_type AS STRING) AS transaction_type,  -- Garantindo que transaction_type seja STRING
+    -- Valor da transação em USD (compra negativa, venda positiva)
     ROUND(
         CASE 
             WHEN t.transaction_type = 'compra' THEN (t.btc_amount * p.btc_price) * -1  
             ELSE (t.btc_amount * p.btc_price)  
         END, 2
-    ) AS transaction_value_in_usd
+    ) AS transaction_value_in_usd,
+    t.transaction_date
 FROM silver.transactions t
 JOIN btc_price p
-    ON t.transaction_date BETWEEN p.prev_timestamp AND p.price_timestamp;
+    ON t.transaction_date >= COALESCE(p.prev_timestamp, p.price_timestamp)  -- Garantindo que prev_timestamp nunca seja NULL
+    AND t.transaction_date <= p.price_timestamp;
 ```
 
 ✅ **Ótimo para cenários onde o histórico precisa ser reprocessado periodicamente.**  
@@ -46,6 +49,13 @@ Se queremos apenas **atualizar novos registros sem reprocessar tudo**, usamos `M
 ```sql
 MERGE INTO gold.transactions AS g
 USING (
+    WITH btc_price AS (
+        SELECT 
+            price_timestamp, 
+            btc_price,
+            LAG(price_timestamp) OVER (ORDER BY price_timestamp) AS prev_timestamp
+        FROM silver.bitcoin_price
+    )
     SELECT 
         t.transaction_id,
         t.customer_id,
@@ -59,11 +69,19 @@ USING (
             END, 2
         ) AS transaction_value_in_usd
     FROM silver.transactions t
-    JOIN silver.bitcoin_price p
-        ON t.transaction_date BETWEEN p.prev_timestamp AND p.price_timestamp
+    JOIN btc_price p
+        ON t.transaction_date >= COALESCE(p.prev_timestamp, p.price_timestamp)
+        AND t.transaction_date <= p.price_timestamp
 ) AS s
 ON g.transaction_id = s.transaction_id
-WHEN MATCHED THEN UPDATE SET *
+WHEN MATCHED AND (
+    g.customer_id <> s.customer_id OR
+    g.transaction_type <> s.transaction_type OR
+    g.btc_amount <> s.btc_amount OR
+    g.transaction_date <> s.transaction_date OR
+    g.transaction_value_in_usd <> s.transaction_value_in_usd
+)
+THEN UPDATE SET *
 WHEN NOT MATCHED THEN INSERT *;
 ```
 
@@ -231,27 +249,6 @@ Podemos usar **Databricks Workflows** para rodar **jobs automáticos**.
    FROM silver.transactions t
    JOIN btc_price p
        ON t.transaction_date BETWEEN p.prev_timestamp AND p.price_timestamp;
-
-   -- Atualiza a tabela gold.customers
-   INSERT OVERWRITE TABLE gold.customers
-   SELECT 
-       c.customer_id,
-       c.name,
-       c.email,
-       c.usd_balance_original,
-       c.btc_balance_original,
-       c.btc_balance_original + COALESCE(SUM(
-            CASE 
-                WHEN t.transaction_type = 'compra' THEN t.btc_amount  
-                WHEN t.transaction_type = 'venda' THEN -t.btc_amount  
-                ELSE 0
-            END
-       ), 0) AS btc_balance_final,
-       COUNT(t.transaction_id) AS total_transactions,
-       c.usd_balance_original + COALESCE(SUM(t.transaction_value_in_usd), 0) AS usd_balance_final
-   FROM silver.customers c
-   LEFT JOIN gold.transactions t ON c.customer_id = t.customer_id
-   GROUP BY c.customer_id, c.name, c.email, c.usd_balance_original, c.btc_balance_original;
    ```
 4. **Configure a Frequência de Execução** (exemplo: a cada 1 hora).
 5. **Execute o Job e monitore no Databricks UI**.

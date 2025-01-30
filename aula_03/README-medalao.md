@@ -31,7 +31,7 @@ A **Silver** é a camada onde os dados são tratados e padronizados. Aqui aplica
 
 ### **📌 Regra 1: Remover Clientes Inválidos**
 - **Descrição:** Clientes inválidos não devem ser incluídos na camada Silver nem na Gold.
-- **Critério:** Remover **Jessica Miller** e **Xavier Walton**.
+- **Critério:** Remover **'Mark Cunningham'**, **'Mark Savage'**
 - **Aplicação:** `silver.customers` já deve conter apenas clientes válidos.
 
 ### **📌 Regra 2: Considerar Apenas Transações Válidas**
@@ -59,7 +59,7 @@ SELECT
     CAST(btc_balance AS DOUBLE) AS btc_balance_original,  -- Mantendo saldo original de BTC
     CAST(last_update AS TIMESTAMP) AS last_update
 FROM bronze.customers
-WHERE name NOT IN ('Jessica Miller', 'Xavier Walton');  -- Removendo clientes inválidos
+WHERE name NOT IN ('Mark Cunningham', 'Mark Savage');  -- Removendo clientes inválidos
 ```
 
 ✅ **Agora `usd_balance_original` e `btc_balance_original` representam o saldo original dos clientes**.  
@@ -73,7 +73,7 @@ CREATE OR REPLACE TABLE silver.transactions AS
 SELECT 
     transaction_id,
     customer_id,
-    transaction_type,
+    CAST(transaction_type AS STRING) AS transaction_type,  -- Forçando para STRING
     btc_amount,
     transaction_date
 FROM bronze.transactions
