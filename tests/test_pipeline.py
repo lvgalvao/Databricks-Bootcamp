@@ -3,7 +3,7 @@ import requests
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 from pyspark.sql import SparkSession
-from main import fetch_bitcoin_price, save_to_table
+from aula_04 import fetch_bitcoin_price, save_to_table
 
 # Inicializa a sessão Spark no Databricks (sem necessidade de criar localmente)
 spark = SparkSession.builder.getOrCreate()
