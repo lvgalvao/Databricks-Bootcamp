@@ -13,8 +13,6 @@ except NameError:
 # Inicializa a sessão Spark no Databricks
 spark = SparkSession.builder.getOrCreate()
 
-print("ola!")
-
 def test_fetch_bitcoin_price():
     """Testa se o notebook Bitcoin Price Ingestion retorna dados válidos."""
     assert dbutils is not None, "dbutils não disponível. Teste deve rodar no Databricks."
@@ -44,3 +42,9 @@ def test_save_to_table():
 
     result = dbutils.notebook.run("aula_04/bitcoin_price_ingestion", 60, {"test_mode": "true"})
     assert result == "success", "Erro ao salvar dados na Delta Table"
+
+# 🔥 **Executar os testes corretamente no Databricks**
+if __name__ == "__main__":
+    exit_code = pytest.main([__file__])
+    if exit_code != 0:
+        raise SystemExit(f"❌ Testes falharam com código {exit_code}")
