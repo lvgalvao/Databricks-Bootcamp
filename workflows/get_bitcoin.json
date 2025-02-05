@@ -13,7 +13,7 @@
       "schedule": {
         "quartz_cron_expression": "17 * * * * ?",
         "timezone_id": "UTC",
-        "pause_status": "UNPAUSED"
+        "pause_status": "PAUSED"
       },
       "max_concurrent_runs": 1,
       "tasks": [
