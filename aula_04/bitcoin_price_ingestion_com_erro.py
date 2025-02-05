@@ -8,7 +8,7 @@ from datetime import datetime
 spark = SparkSession.builder.appName("Bitcoin Price Ingestion").enableHiveSupport().getOrCreate()
 
 # Configuração da API
-API_URL = "https://api.coinbase.com/v2/prices/spot?cncy=USD"
+API_URL = "https://api.coinbase.com/v2/prices/spot?currency=USD"
 
 def fetch_bitcoin_price():
     """Obtém o preço atual do Bitcoin da API Coinbase."""
