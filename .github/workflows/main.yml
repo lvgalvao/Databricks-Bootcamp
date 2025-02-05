@@ -13,11 +13,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Instalando Requeriments
-        working-directory: tests_worflows
+        working-directory: tests_workflows
         run: pip install -r requirements.txt
       - name: Sync dos Jobs
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-        working-directory: tests_worflows
+        working-directory: tests_workflows
         run: python jobs.py
