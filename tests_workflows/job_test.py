@@ -10,7 +10,7 @@ DATABRICKS_HOST = os.getenv("DATABRICKS_HOST")
 
 def load_settings():
     """Carrega as configurações do job a partir de um arquivo JSON."""
-    with open(f"test_worflow.json", "r") as openfile:
+    with open(f"test_workflow.json", "r") as openfile:
         settings = json.load(openfile)
 
     # Extraindo apenas o "job_id" e "settings" para o formato correto
