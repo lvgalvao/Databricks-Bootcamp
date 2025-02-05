@@ -5,7 +5,7 @@ from pyspark.sql.types import StructType, StructField, StringType, FloatType, Ti
 from datetime import datetime
 
 # Inicializar Spark
-spark = SparkSession.builder.appName("Bitcoin Price Ingestion").getOrCreate()
+spark = SparkSession.builder.appName("Bitcoin Price Ingestion").enableHiveSupport().getOrCreate()
 
 # Configuração da API
 API_URL = "https://api.coinbase.com/v2/prices/spot?currency=USD"
@@ -26,8 +26,8 @@ def fetch_bitcoin_price():
     except requests.exceptions.RequestException as e:
         raise Exception(f"Erro ao acessar a API: {e}")
 
-def save_to_delta(data):
-    """Salva os dados no Delta Lake."""
+def save_to_table(data):
+    """Salva os dados na Delta Table no Databricks."""
     # Definir o schema com a nova coluna datetime
     schema = StructType([
         StructField("amount", FloatType(), True),
@@ -39,12 +39,14 @@ def save_to_delta(data):
     # Converter para DataFrame
     data_df = spark.createDataFrame([data], schema=schema)
     
-    # Caminho no Delta Lake
-    delta_path = "/mnt/delta/bitcoin_price"
-    
-    # Escrever no Delta Lake no modo append
-    data_df.write.format("delta").mode("append").save(delta_path)
-    print(f"Dados salvos em Delta Table no caminho: {delta_path}")
+    # Nome da tabela no Databricks
+    table_name = "bronze.bitcoin_price"
+
+    # Criar a tabela Delta se não existir
+
+    # Escrever na tabela Delta no modo append
+    data_df.write.format("delta").mode("append").saveAsTable(table_name)
+    print(f"Dados salvos na Delta Table: {table_name}")
 
 if __name__ == "__main__":
     # Obter dados da API
@@ -52,8 +54,8 @@ if __name__ == "__main__":
     bitcoin_price = fetch_bitcoin_price()
     print("Dados obtidos:", bitcoin_price)
     
-    # Salvar no Delta Lake
-    print("Salvando dados no Delta Lake...")
-    save_to_delta(bitcoin_price)
+    # Salvar na Delta Table
+    print("Salvando dados na Delta Table...")
+    save_to_table(bitcoin_price)
     print("Pipeline concluído com sucesso.")
 
