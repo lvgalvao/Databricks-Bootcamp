@@ -13,6 +13,8 @@ except NameError:
 # Inicializa a sessão Spark no Databricks
 spark = SparkSession.builder.getOrCreate()
 
+print("ola!")
+
 def test_fetch_bitcoin_price():
     """Testa se o notebook Bitcoin Price Ingestion retorna dados válidos."""
     assert dbutils is not None, "dbutils não disponível. Teste deve rodar no Databricks."
