@@ -3,18 +3,24 @@ import requests
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 from pyspark.sql import SparkSession
-import databricks.dbutils as dbutils  # Para chamar notebooks
+
+# Acessa `dbutils` dinamicamente no Databricks
+try:
+    dbutils = get_ipython().user_ns["dbutils"]
+except NameError:
+    dbutils = None  # Evita erro fora do Databricks
 
 # Inicializa a sessão Spark no Databricks
 spark = SparkSession.builder.getOrCreate()
 
 def test_fetch_bitcoin_price():
     """Testa se o notebook Bitcoin Price Ingestion retorna dados válidos."""
+    assert dbutils is not None, "dbutils não disponível. Teste deve rodar no Databricks."
+
     result = dbutils.notebook.run("aula_04/bitcoin_price_ingestion", 60)  # Timeout de 60 segundos
-    
     assert result is not None, "O notebook retornou None"
     
-    data = eval(result)  # Converte string para dicionário (se necessário)
+    data = eval(result)  # Converte string para dicionário
     
     assert isinstance(data, dict), "O resultado não é um dicionário"
     assert "amount" in data, "Campo 'amount' ausente"
@@ -25,6 +31,8 @@ def test_fetch_bitcoin_price():
 
 def test_save_to_table():
     """Testa se o notebook Bitcoin Price Ingestion salva os dados corretamente."""
+    assert dbutils is not None, "dbutils não disponível. Teste deve rodar no Databricks."
+
     test_data = {
         "amount": 45000.00,
         "base": "BTC",
@@ -33,5 +41,4 @@ def test_save_to_table():
     }
 
     result = dbutils.notebook.run("aula_04/bitcoin_price_ingestion", 60, {"test_mode": "true"})
-
     assert result == "success", "Erro ao salvar dados na Delta Table"
