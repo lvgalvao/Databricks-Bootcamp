@@ -26,12 +26,12 @@ def run_job(settings):
     return resp
 
 def main():
-    settings = load_settings(i)
+    settings = load_settings()
     resp = run_job(settings=settings)
     if resp.status_code == 200:
-        print(f"Job {i} atualizado com sucesso.")
+        print(f"Job  atualizado com sucesso.")
     else:
-        print(f"Erro ao atualizar o job {i}.")
+        print(f"Erro ao atualizar o job .")
 
 if __name__ == "__main__":
     main()
