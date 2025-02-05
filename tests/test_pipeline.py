@@ -45,6 +45,6 @@ def test_save_to_table():
 
 # 🔥 **Executar os testes corretamente no Databricks**
 if __name__ == "__main__":
-    exit_code = pytest.main()
+    exit_code = pytest.main(["--cache-clear"])  # Desativa o cache do pytest
     if exit_code != 0:
         raise SystemExit(f"❌ Testes falharam com código {exit_code}")
