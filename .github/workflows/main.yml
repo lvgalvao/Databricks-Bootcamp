@@ -15,9 +15,9 @@ jobs:
       - name: Instalando Requeriments
         working-directory: tests_workflows
         run: pip install -r requirements.txt
-      - name: Sync dos Jobs
+      - name: Validação do Job
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         working-directory: tests_workflows
-        run: python jobs.py
+        run: python job_test.py
